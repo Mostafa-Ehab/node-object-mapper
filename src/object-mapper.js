@@ -11,8 +11,7 @@ var _undefined
  * @constructor
  */
 
-function ObjectMapper(src, dest, map)
-{
+function ObjectMapper(src, dest, map) {
   // There are two different constructors - move around properties if needed
   // e.g (ObjectMapper(from,map))
   if (typeof map === 'undefined') {
@@ -26,7 +25,7 @@ function ObjectMapper(src, dest, map)
     // Extract the data from the source object or array
     const data = getKeyValue(src, srckey)
     // Build an object with all of these parameters in case custom transform or default functions need them to derive their values
-    let context = {src: src, srckey: srckey, destkey: destkey}
+    let context = { src: src, srckey: srckey, destkey: destkey }
     // Set the data into the destination object or array format
     dest = setKeyValue(dest, destkey, data, context)
   }
@@ -36,8 +35,7 @@ function ObjectMapper(src, dest, map)
 
 // A string of how to navigate through the incoming array is sent.
 // This is translated into an array of instructions for the recursive object
-function getKeyValue(src, keystr)
-{
+function getKeyValue(src, keystr) {
   // Parse the source key string into an array/object format that is easy to recurse through
   let keys = parse(keystr)
   // Select the data from the source object or array
@@ -48,14 +46,15 @@ function getKeyValue(src, keystr)
 
 // With a given source key array, select the corresponding value(s) in the source object/array.
 // If the value does not exist, return null
-function select(src, keys)
-{
+function select(src, keys) {
   // Get the object key or index that needs to be parsed
   const key = keys.shift()
 
   // The child entity is an array.  Traverse the array to obtain data
-  if (key.ix !== null && typeof key.ix !== 'undefined')
-    return select_arr(src, key, keys)
+  if (key.ix !== null && typeof key.ix !== 'undefined') {
+    let data = select_arr(src, key, keys)
+    return data
+  }
 
   // The next instruction is an object key.  Try to obtain the data for the given object key
   if (key.name)
@@ -66,8 +65,7 @@ function select(src, keys)
 }
 
 // Loop through the array and select the key from each value in the array.  If nothing comes back, return null
-function select_arr(src, key, keys)
-{
+function select_arr(src, key, keys) {
   let data = []
 
   // The source is not an array even though we specify array.  Grab the subnode and add to an array.
@@ -77,11 +75,11 @@ function select_arr(src, key, keys)
     if (keys.length)
       d = select(src, keys)
     // If we found something, return it as an array
-    return (d !== null) ? [ d ] : null
+    return (d !== null) ? [d] : null
   }
 
   // Recursively loop through the array and grab the data
-  for (var i=0; i<src.length; i++) {
+  for (var i = 0; i < src.length; i++) {
     // Check to see if we are at a 'leaf' (no more keys to parse).  If so, return the data.  If not, recurse
     var d = (keys.length) ? select(src[i], keys.slice()) : src[i]
     // If the data is populated, add it to the array.  Make sure to keep the same array index so that traversing multi-level arrays work
@@ -100,24 +98,22 @@ function select_arr(src, key, keys)
   // If we are not expecting an array, return the first node - kinda hacky
   if (typeof data[0] !== 'undefined' && key.name && data[0][key.name])
     return data[0][key.name]
-  
+
   // Otherwise, return nothing
   return null
 }
 
 // Allows negative array indexes to count down from end of array
-function negative_array_access(arr, ix)
-{
+function negative_array_access(arr, ix) {
   var pix = parseInt(ix);
   return pix < 0 ? arr[arr.length + pix] : arr[ix];
 }
 
 // Traverse the given object for data using the given key array
-function select_obj(src, key, keys)
-{
+function select_obj(src, key, keys) {
   // Make sure that there is data where we are looking
   if (src && key.name) {
-    
+
     // Match all keys in the object
     if (key.name == '*')
       return select_obj_keys(src, keys)
@@ -144,10 +140,9 @@ function select_obj(src, key, keys)
 }
 
 // Loop through all the keys in the object and select the key from each key in the object.  If nothing comes back, return null
-function select_obj_keys(src, keys)
-{
+function select_obj_keys(src, keys) {
   let data = []
-  let n=0
+  let n = 0
   // Recursively loop through the object keys and grab the data
   for (let k in src) {
     // Check to see if we are at a 'leaf' (no more keys to parse).  If so, return the data.  If not, recurse
@@ -166,15 +161,15 @@ function select_obj_keys(src, keys)
 }
 
 // The goal of this function is to identify the different ways that this function can be called, and to structure the data uniformly before caling update()
-function setKeyValue(dest, keystr, data, context = {})
-{
+function setKeyValue(dest, keystr, data, context = {}) {
   // Keystr is undefined - call set_data in case there is a default or transformation to deal with
-  if (typeof keystr == 'undefined' || keystr == null)
+  if (typeof keystr == 'undefined' || keystr == null) {
     return set_data(dest, keystr, data, context)
+  }
 
   // Keystr is an array of values.  Loop through each and identify what format the individual values are
   if (Array.isArray(keystr)) {
-    for (let i=0; i<keystr.length; i++) {
+    for (let i = 0; i < keystr.length; i++) {
 
       // The substring value is in string notation - recurse with the key string
       if (typeof keystr[i] == 'string')
@@ -182,25 +177,25 @@ function setKeyValue(dest, keystr, data, context = {})
 
       // The subtring value is in array notation - recurse with the key from the array
       else if (Array.isArray(keystr[i])) {
-        let [k,t,d] = keystr[i]
+        let [k, t, d] = keystr[i]
         if (typeof t !== 'undefined') context.transform = t
         if (typeof d !== 'undefined') context.default = d
         dest = setKeyValue(dest, k, data, context)
       }
-      
+
       // The substring value is in object notation - dig further
       else {
         if (typeof keystr[i].transform !== 'undefined') context.transform = keystr[i].transform
         if (typeof keystr[i].default !== 'undefined') context.default = keystr[i].default
-        
+
         // If the substring value of the key is an array, parse the array.  If this is parsed in a recursion, it is confused with arrays containing multiple values
         if (Array.isArray(keystr[i].key)) {
-          let [k,t,d] = keystr[i].key
+          let [k, t, d] = keystr[i].key
           if (typeof t !== 'undefined') context.transform = t
           if (typeof d !== 'undefined') context.default = d
           dest = setKeyValue(dest, k, data, context)
         }
-        
+
         // The substring value is regular object notation - recurse with the key of the substring
         else
           dest = setKeyValue(dest, keystr[i].key, data, context)
@@ -209,8 +204,9 @@ function setKeyValue(dest, keystr, data, context = {})
   }
 
   // The value is in string notation - ready for update!
-  else if (typeof keystr == 'string')
+  else if (typeof keystr == 'string') {
     dest = update(dest, data, parse(keystr), context)
+  }
 
   // The value is in object notation - dig a bit further
   else {
@@ -218,7 +214,7 @@ function setKeyValue(dest, keystr, data, context = {})
     if (typeof keystr.default !== 'undefined') context.default = keystr.default
     // If the value of the key is an array, parse the array.  If this is parsed in a recursion, it is confused with arrays containing multiple values
     if (Array.isArray(keystr.key)) {
-      let [k,t,d] = keystr.key
+      let [k, t, d] = keystr.key
       if (typeof t !== 'undefined') context.transform = t
       if (typeof d !== 'undefined') context.default = d
       dest = setKeyValue(dest, k, data, context)
@@ -232,8 +228,7 @@ function setKeyValue(dest, keystr, data, context = {})
 }
 
 // if the data is an array, walk down the obj path and build until there is an array key
-function update(dest, data, keys, context)
-{
+function update(dest, data, keys, context) {
   if (keys) {
     // Get the object key and index that needs to be parsed
     const key = keys.shift()
@@ -253,8 +248,7 @@ function update(dest, data, keys, context)
 }
 
 // Update the destination object.key with the data
-function update_obj(dest, key, data, keys, context)
-{
+function update_obj(dest, key, data, keys, context) {
   // There are further instructions remaining - we will need to recurse
   if (keys.length) {
     // There is a pre-existing destination object.  Recurse through to the object key
@@ -281,13 +275,25 @@ function update_obj(dest, key, data, keys, context)
 }
 
 // Update the dest[] array with the data on each index
-function update_arr(dest, key, data, keys, context)
-{
+function update_arr(dest, key, data, keys, context) {
+  // See if data is null and there is a default
+  if (typeof context.default !== 'undefined' && (data == null || typeof data == 'undefined')) {
+    // There is a default function, call the function to set the default
+    if (typeof context.default == 'function') {
+      dest = dest || {}
+      data = context.default(context.src, context.srckey, dest, context.destkey)
+    }
+    // The default is a specific value
+    else {
+      data = context.default
+    }
+  }
+
   // The 'add' instruction is set.  This means to take the data and add it onto a new array node 
   if (key.add) {
     if (data !== null && typeof data !== 'undefined') {
       dest = dest || []
-      dest.push(applyTransform(data,dest,context))
+      dest.push(applyTransform(data, dest, context))
       // dest = dest.concat(data)
     }
     return dest
@@ -295,17 +301,17 @@ function update_arr(dest, key, data, keys, context)
 
   // Just update a single array node
   if (key.ix !== '') {
-    return update_arr_ix(dest, key.ix, applyTransform(data,dest,context), keys, context)
+    return update_arr_ix(dest, key.ix, applyTransform(data, dest, context), keys, context)
   }
 
   // If the data is in an array format then make sure that there is a dest index for each data index
   if (Array.isArray(data)) {
     dest = dest || []
     // Loop through each index in the data array and update the destination object with the data
-    dest = data.reduce(function(dest,d,i) {
+    dest = data.reduce(function (dest, d, i) {
       // If the instruction is to update all array indices ('') or the current index, update the child data element.  Otherwise, don't bother
       if (key.ix == '' || key.ix == i) {
-        return update_arr_ix(dest, i, applyTransform(d,dest,context), keys.slice(), context)
+        return update_arr_ix(dest, i, applyTransform(d, dest, context), keys.slice(), context)
       }
     }, dest)
 
@@ -313,20 +319,19 @@ function update_arr(dest, key, data, keys, context)
   }
 
   // Set the specific array index with the data
-  else 
+  else
     return update_arr_ix(dest, '0', data, keys, context)
 }
 
-function applyTransform(data, dest, context){
+function applyTransform(data, dest, context) {
   if (typeof context.transform == 'function') {
     return context.transform(data, context.src, dest, context.srckey, context.destkey)
-  }else{
+  } else {
     return data;
   }
 }
 
-function update_arr_ix(dest, ix, data, keys, context)
-{
+function update_arr_ix(dest, ix, data, keys, context) {
   let o
   if (dest !== null && typeof dest !== 'undefined' && typeof dest[ix] !== 'undefined')
     o = (keys.length) ? update(dest[ix], data, keys, context) : data
@@ -343,8 +348,13 @@ function update_arr_ix(dest, ix, data, keys, context)
 }
 
 // Set the given data into the given destination object
-function set_data(dest, key, data, context)
-{
+function set_data(dest, key, data, context) {
+  // If there is a transformation function, call the function.
+  if (typeof context.transform == 'function') {
+    dest = dest || {}
+    data = context.transform(data, context.src, dest, context.srckey, context.destkey)
+  }
+
   // See if data is null and there is a default
   if (typeof context.default !== 'undefined' && (data == null || typeof data == 'undefined')) {
     // There is a default function, call the function to set the default
@@ -353,14 +363,9 @@ function set_data(dest, key, data, context)
       data = context.default(context.src, context.srckey, dest, context.destkey)
     }
     // The default is a specific value
-    else
+    else {
       data = context.default
-  }
-
-  // If there is a transformation function, call the function.
-  if (typeof context.transform == 'function') {
-    dest = dest || {}
-    data = context.transform(data, context.src, dest, context.srckey, context.destkey)
+    }
   }
 
   // Set the object to the data if it is not undefined
@@ -379,8 +384,7 @@ function set_data(dest, key, data, context)
 
 // Turns a key string (like key1.key2[].key3 into ['key1','key2','[]','key3']...)
 // 
-function parse(key_str, delimiter = '.')
-{
+function parse(key_str, delimiter = '.') {
   // Return null if the key_str is null
   if (key_str == null)
     return null
@@ -390,28 +394,28 @@ function parse(key_str, delimiter = '.')
   //const key_arr = key_str.split(delimiter)
   let keys = []
   let n = 0
-  for (let i=0; i<key_arr.length; i++) {
+  for (let i = 0; i < key_arr.length; i++) {
     // Build a object which is either an object key or an array
     //  Note that this is not the most readable, but it is fastest way to parse the string (at this point in time)
-    let name_begin=-1, name_end=-1, ix_begin=-1, ix_end=-1, o = {}, a = {}, k = key_arr[i]
-    for (let j=0; j<k.length; j++) {
+    let name_begin = -1, name_end = -1, ix_begin = -1, ix_end = -1, o = {}, a = {}, k = key_arr[i]
+    for (let j = 0; j < k.length; j++) {
       switch (k[j]) {
-        case '[' :
-          ix_begin = j+1
+        case '[':
+          ix_begin = j + 1
           name_end = j
           break
-        case ']' :
+        case ']':
           ix_end = j
           break
-        case '+' :
-          if (ix_end == j-1) a.add = true
+        case '+':
+          if (ix_end == j - 1) a.add = true
           break
-        case '?' :
+        case '?':
           name_end = j
           if (ix_end == -1) o.nulls = true
           break
-        default :
-          if (ix_begin == -1) name_end = j+1
+        default:
+          if (ix_begin == -1) name_end = j + 1
       }
     }
     if (name_end > 0) {
@@ -425,34 +429,33 @@ function parse(key_str, delimiter = '.')
   }
 
   return keys
-} 
+}
 
 // Perform the same function as split(), but keep track of escaped delimiters
-function split(str, delimiter)
-{
+function split(str, delimiter) {
   let arr = [], n = 0
-  , esc = -99
-  , s = ''
+    , esc = -99
+    , s = ''
 
-  for (let i=0; i<str.length; i++) {
-    switch(str[i]) {
-      case delimiter :
-        if (esc !== (i-1)) {
+  for (let i = 0; i < str.length; i++) {
+    switch (str[i]) {
+      case delimiter:
+        if (esc !== (i - 1)) {
           arr[n++] = s
           s = ''
         } else s += str[i]
         break
-      case '\\' :
+      case '\\':
         // Escaping a backslash
-        if (esc == (i-1)) {
+        if (esc == (i - 1)) {
           esc = -99
-          s += str[i-1] + str[i]
-        } else 
+          s += str[i - 1] + str[i]
+        } else
           esc = i
         break
-      default :
-        if (esc == (i-1))
-          s += str[i-1]
+      default:
+        if (esc == (i - 1))
+          s += str[i - 1]
         s += str[i]
     }
   }

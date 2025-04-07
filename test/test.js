@@ -3,27 +3,27 @@
 //const om = require('object-mapper')
 const om = require('../')
   , test = require('tape')
-  // , performance = require('perf_hooks').performance
+// , performance = require('perf_hooks').performance
 
 test('SPLIT with complicated key', function (t) {
   var k = 'abc.def.ghi.j..k\\.l\\\\.m.'
-  var expect = ['abc','def','ghi','j','','k.l\\\\','m','']
+  var expect = ['abc', 'def', 'ghi', 'j', '', 'k.l\\\\', 'm', '']
   var result = om.split(k, '.')
   t.deepEqual(result, expect);
   t.end();
 });
-  
+
 test('PARSE with complicated key', function (t) {
   var k = 'abc[].def[42]+.ghi?.j..k\\.l\\\\.m.'
-  var expect = [{name: 'abc'},{ix: ''},{name: 'def'},{ix: '42', add: true},{name: 'ghi', nulls: true},{name: 'j'},{name: 'k.l\\\\'},{name: 'm'}]
+  var expect = [{ name: 'abc' }, { ix: '' }, { name: 'def' }, { ix: '42', add: true }, { name: 'ghi', nulls: true }, { name: 'j' }, { name: 'k.l\\\\' }, { name: 'm' }]
   var result = om.parse(k, '.')
   t.deepEqual(result, expect);
   t.end();
 });
-  
+
 test('PARSE with simple key', function (t) {
   var k = 'abc'
-  var expect = [{name: 'abc'}]
+  var expect = [{ name: 'abc' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
@@ -31,7 +31,7 @@ test('PARSE with simple key', function (t) {
 
 test('PARSE abc? (simple key allowing nulls)', function (t) {
   var k = 'abc?'
-  var expect = [{name: 'abc', nulls: true}]
+  var expect = [{ name: 'abc', nulls: true }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
@@ -39,14 +39,14 @@ test('PARSE abc? (simple key allowing nulls)', function (t) {
 
 test('PARSE with simple empty array key', function (t) {
   var k = 'abc[]'
-  var expect = [{name: 'abc'}, {ix: ''}]
+  var expect = [{ name: 'abc' }, { ix: '' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
 });
 test('PARSE with no key empty array key', function (t) {
   var k = '[]'
-  var expect = [{ix: ''}]
+  var expect = [{ ix: '' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
@@ -60,59 +60,59 @@ test('PARSE with nothing', function (t) {
 });
 test('PARSE with simple dot notation key', function (t) {
   var k = 'abc.def'
-  var expect = [{name: 'abc'}, {name: 'def'}]
+  var expect = [{ name: 'abc' }, { name: 'def' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
 });
 test('PARSE with deep dot notation key', function (t) {
   var k = 'a.b.c.d.e.f'
-  var expect = [{name: 'a'},{name: 'b'},{name: 'c'},{name: 'd'},{name: 'e'},{name: 'f'}]
+  var expect = [{ name: 'a' }, { name: 'b' }, { name: 'c' }, { name: 'd' }, { name: 'e' }, { name: 'f' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
 });
 test('PARSE with deep brackets', function (t) {
   var k = 'abc[].def'
-  var expect = [{name: 'abc'},{ix: ''},{name: 'def'}]
+  var expect = [{ name: 'abc' }, { ix: '' }, { name: 'def' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
 });
 test('PARSE with deep brackets and instruction to add together', function (t) {
   var k = 'abc[]+.def'
-  var expect = [{name: 'abc'},{ix: '', add: true},{name: 'def'}]
+  var expect = [{ name: 'abc' }, { ix: '', add: true }, { name: 'def' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
 });
 test('PARSE with deep brackets and instruction to add nulls', function (t) {
   var k = 'abc[]+.def?'
-  var expect = [{name: 'abc'},{ix: '', add: true},{name: 'def', nulls: true}]
+  var expect = [{ name: 'abc' }, { ix: '', add: true }, { name: 'def', nulls: true }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
 });
 test('PARSE with deep brackets', function (t) {
   var k = '[].def'
-  var expect = [{ix: ''},{name: 'def'}]
+  var expect = [{ ix: '' }, { name: 'def' }]
   var result = om.parse(k)
   t.deepEqual(result, expect);
   t.end();
 });
 test('MAP with empty default on missing key', function (t) {
-  var obj = {foo: 'bar'}
-  var map = {'undefined_key': {key:'key_with_default', default:''}}
-  var expect = {key_with_default: ''}
+  var obj = { foo: 'bar' }
+  var map = { 'undefined_key': { key: 'key_with_default', default: '' } }
+  var expect = { key_with_default: '' }
 
   var result = om(obj, map);
   t.deepEqual(result, expect);
   t.end();
 });
 test('MAP with null default on missing key', function (t) {
-  var obj = {foo: 'bar'}
-  var map = {'undefined_key': {key:'key_with_default', default: null}}
-  var expect = {key_with_default: null}
+  var obj = { foo: 'bar' }
+  var map = { 'undefined_key': { key: 'key_with_default', default: null } }
+  var expect = { key_with_default: null }
 
   var result = om(obj, map);
   t.deepEqual(result, expect);
@@ -128,39 +128,45 @@ test('MAP with null default on missing key', function (t) {
 
 test('MAP - multiple levels of array indexes on both the from and to arrays', function (t) {
   var obj =
-{ Items:
-    [
-        { SubItems:
+  {
+    Items:
+      [
+        {
+          SubItems:
             [
-                { SubKey: 'item 1 id a' },
-                { SubKey: 'item 1 id b' }
+              { SubKey: 'item 1 id a' },
+              { SubKey: 'item 1 id b' }
             ]
         },
-        { SubItems:
+        {
+          SubItems:
             [
-                { SubKey: 'item 2 id a' },
-                { SubKey: 'item 2 id b' }
+              { SubKey: 'item 2 id a' },
+              { SubKey: 'item 2 id b' }
             ]
         }
-    ]
-}
-var expect =
-{ items:
-    [
-        { subitems:
+      ]
+  }
+  var expect =
+  {
+    items:
+      [
+        {
+          subitems:
             [
-                { subkey: 'item 1 id a' },
-                { subkey: 'item 1 id b' },
+              { subkey: 'item 1 id a' },
+              { subkey: 'item 1 id b' },
             ]
         },
-        { subitems:
+        {
+          subitems:
             [
-                { subkey: 'item 2 id a' },
-                { subkey: 'item 2 id b' },
+              { subkey: 'item 2 id a' },
+              { subkey: 'item 2 id b' },
             ]
         }
-    ]
-}
+      ]
+  }
   var map = {
     'Items[].SubItems[].SubKey': 'items[].subitems[].subkey'
   };
@@ -172,11 +178,11 @@ var expect =
   t.deepEqual(result, expect);
   t.end();
 });
-  
+
 
 test('get value - one level deep', function (t) {
 
-  var obj = { foo: { bar: "baz"} }
+  var obj = { foo: { bar: "baz" } }
   var map = 'foo.bar'
   var expect = "baz"
   var result = om.getKeyValue(obj, map)
@@ -375,15 +381,17 @@ test('get value - two level deep array', function (t) {
   var key = 'foo[].baz[].fog.baz';
 
   var obj =
-  { "foo":
-    [
-      { "baz":
-        [
-          { "fog": { "baz": "bar" } },
-          { "fog": { "baz": "var" } }
-        ]
-      }
-    ]
+  {
+    "foo":
+      [
+        {
+          "baz":
+            [
+              { "fog": { "baz": "bar" } },
+              { "fog": { "baz": "var" } }
+            ]
+        }
+      ]
   };
 
   var expect = [["bar", "var"]];
@@ -437,7 +445,7 @@ test('get value - crazy negative', function (t) {
 
 
 test('select with array object where map is not an array 1', function (t) {
-  var obj = { foo: [{bar: 'a'}, {bar: 'b'}, {bar: 'c'}] }
+  var obj = { foo: [{ bar: 'a' }, { bar: 'b' }, { bar: 'c' }] }
   var map = 'foo.bar'
   var expect = 'a'
   var result = om.getKeyValue(obj, map)
@@ -446,9 +454,9 @@ test('select with array object where map is not an array 1', function (t) {
 })
 
 test('select with array object where map is not an array 2', function (t) {
-  var obj = { foo: [{bar: 'a'}, {bar: 'b'}, {bar: 'c'}] }
+  var obj = { foo: [{ bar: 'a' }, { bar: 'b' }, { bar: 'c' }] }
   var map = 'foo[].bar'
-  var expect = ['a','b','c']
+  var expect = ['a', 'b', 'c']
   var result = om.getKeyValue(obj, map)
   t.deepEqual(result, expect);
   t.end();
@@ -1115,7 +1123,7 @@ test('map object to another - with key object notation with default function whe
 
 test('map object to another - when target key is undefined it should be ignored', function (t) {
   var obj = {
-    "a" : 1234,
+    "a": 1234,
     "foo": {
       "bar": "baz"
     }
@@ -1123,14 +1131,14 @@ test('map object to another - when target key is undefined it should be ignored'
 
   var expect = {
     bar: {
-      bar : "baz",
+      bar: "baz",
     }
   };
 
   var map = {
-    'foo.bar' : 'bar.bar',
+    'foo.bar': 'bar.bar',
     'a': undefined
-   };
+  };
 
   var result = om(obj, map);
 
@@ -1140,7 +1148,7 @@ test('map object to another - when target key is undefined it should be ignored'
 
 test('map object to another - with key object notation with default function returning undefined when key does not exists', function (t) {
   var obj = {
-    "a" : 1234,
+    "a": 1234,
     "foo": {
       "bar": "baz"
     }
@@ -1148,20 +1156,20 @@ test('map object to another - with key object notation with default function ret
 
   var expect = {
     bar: {
-      bar : "baz",
-      a : 1234
+      bar: "baz",
+      a: 1234
     }
   };
 
   var map = {
-    'foo.bar' : 'bar.bar',
+    'foo.bar': 'bar.bar',
     'notExistingKey': {
       key: 'bar.test',
       default: function (fromObject, fromKey, toObject, toKey) {
         return undefined
       }
     },
-    'a' : 'bar.a'
+    'a': 'bar.a'
   };
 
   var result = om(obj, map);
@@ -1367,9 +1375,9 @@ test('map object to another - with key array notation with transform function', 
 
 test('map object to another - map object without destination key via transform', function (t) {
   var obj = {
-    thing : {
-      thing2 : {
-        thing3 : {
+    thing: {
+      thing2: {
+        thing3: {
           a: 'a1'
           , b: 'b1'
         }
@@ -1378,14 +1386,14 @@ test('map object to another - map object without destination key via transform',
   };
 
   var map = {
-    'thing.thing2.thing3' : [[ null, function (val, src, dst) {
-        dst.manual = val.a + val.b;
-      }
-    , null ]]
+    'thing.thing2.thing3': [[null, function (val, src, dst) {
+      dst.manual = val.a + val.b;
+    }
+      , null]]
   };
 
   var expect = {
-    'manual' : 'a1b1'
+    'manual': 'a1b1'
   };
 
   var result = om(obj, map);
@@ -1397,8 +1405,8 @@ test('map object to another - map object without destination key via transform',
 test('array mapping - simple', function (t) {
   var obj = {
     "comments": [
-      {a: 'a1', b: 'b1'}
-      , {a: 'a2', b: 'b2'}
+      { a: 'a1', b: 'b1' }
+      , { a: 'a2', b: 'b2' }
     ]
   };
 
@@ -1409,8 +1417,8 @@ test('array mapping - simple', function (t) {
 
   var expect = {
     "comments": [
-      {c: 'a1', d: 'b1'}
-      , {c: 'a2', d: 'b2'}
+      { c: 'a1', d: 'b1' }
+      , { c: 'a2', d: 'b2' }
     ]
   };
 
@@ -1425,8 +1433,8 @@ test('array mapping - two level deep', function (t) {
     "comments": [
       {
         "data": [
-          {a: 'a1', b: 'b1'}
-          , {a: 'a2', b: 'b2'}
+          { a: 'a1', b: 'b1' }
+          , { a: 'a2', b: 'b2' }
         ]
       }
     ]
@@ -1441,8 +1449,8 @@ test('array mapping - two level deep', function (t) {
     "comments": [
       {
         "data": [
-          {c: 'a1', d: 'b1'}
-          , {c: 'a2', d: 'b2'}
+          { c: 'a1', d: 'b1' }
+          , { c: 'a2', d: 'b2' }
         ]
       }
     ]
@@ -1458,8 +1466,8 @@ test('array mapping - simple deep', function (t) {
   var obj = {
     "thing": {
       "comments": [
-        {a: 'a1', b: 'b1'}
-        , {a: 'a2', b: 'b2'}
+        { a: 'a1', b: 'b1' }
+        , { a: 'a2', b: 'b2' }
       ]
     }
   };
@@ -1472,8 +1480,8 @@ test('array mapping - simple deep', function (t) {
   var expect = {
     "thing": {
       "comments": [
-        {c: 'a1', d: 'b1'}
-        , {c: 'a2', d: 'b2'}
+        { c: 'a1', d: 'b1' }
+        , { c: 'a2', d: 'b2' }
       ]
     }
   };
@@ -1487,8 +1495,8 @@ test('array mapping - simple deep', function (t) {
 test('array mapping - from/to specific indexes', function (t) {
   var obj = {
     "comments": [
-      {a: 'a1', b: 'b1'}
-      , {a: 'a2', b: 'b2'}
+      { a: 'a1', b: 'b1' }
+      , { a: 'a2', b: 'b2' }
     ]
   };
 
@@ -1499,7 +1507,7 @@ test('array mapping - from/to specific indexes', function (t) {
 
   var expect = {
     "comments": [
-      , {c: 'a1', d: 'b1'}
+      , { c: 'a1', d: 'b1' }
     ]
   };
 
@@ -1511,8 +1519,8 @@ test('array mapping - from/to specific indexes', function (t) {
 
 test('array mapping - fromObject is an array', function (t) {
   var obj = [
-    {a: 'a1', b: 'b1'}
-    , {a: 'a2', b: 'b2'}
+    { a: 'a1', b: 'b1' }
+    , { a: 'a2', b: 'b2' }
   ];
 
   var map = {
@@ -1521,8 +1529,8 @@ test('array mapping - fromObject is an array', function (t) {
   };
 
   var expect = [
-    {c: 'a1', d: 'b1'}
-    , {c: 'a2', d: 'b2'}
+    { c: 'a1', d: 'b1' }
+    , { c: 'a2', d: 'b2' }
   ];
 
   var result = om(obj, map);
@@ -1580,26 +1588,26 @@ test('array mapping - fromObject empty array property ignored', function (t) {
 
 test('mapping - map full array to single value via transform', function (t) {
   var obj = {
-    thing : [
-      {a: 'a1', b: 'b1'}
-      , {a: 'a2', b: 'b2'}
-      , {a: 'a3', b: 'b3'}
+    thing: [
+      { a: 'a1', b: 'b1' }
+      , { a: 'a2', b: 'b2' }
+      , { a: 'a3', b: 'b3' }
     ]
   };
 
   var map = {
-    'thing' : [[ 'thing2', function (val, src, dst) {
-        var a = val.reduce(function (i, obj) {
-          return i += obj.a;
-        }, '');
+    'thing': [['thing2', function (val, src, dst) {
+      var a = val.reduce(function (i, obj) {
+        return i += obj.a;
+      }, '');
 
-        return a;
-      }
-    , null ]]
+      return a;
+    }
+      , null]]
   };
 
   var expect = {
-    'thing2' : 'a1a2a3'
+    'thing2': 'a1a2a3'
   };
 
   var result = om(obj, map);
@@ -1610,30 +1618,30 @@ test('mapping - map full array to single value via transform', function (t) {
 
 test('mapping - map full array without destination key via transform', function (t) {
   var obj = {
-    thing : {
-      thing2 : {
-        thing3 : [
-          {a: 'a1', b: 'b1'}
-          , {a: 'a2', b: 'b2'}
-          , {a: 'a3', b: 'b3'}
+    thing: {
+      thing2: {
+        thing3: [
+          { a: 'a1', b: 'b1' }
+          , { a: 'a2', b: 'b2' }
+          , { a: 'a3', b: 'b3' }
         ]
       }
     }
   };
 
   var map = {
-    'thing.thing2.thing3' : [[ null, function (val, src, dst) {
-        var a = val.reduce(function (i, obj) {
-          return i += obj.a;
-        }, '');
+    'thing.thing2.thing3': [[null, function (val, src, dst) {
+      var a = val.reduce(function (i, obj) {
+        return i += obj.a;
+      }, '');
 
-        dst.manual = a
-      }
-    , null ]]
+      dst.manual = a
+    }
+      , null]]
   };
 
   var expect = {
-    'manual' : 'a1a2a3'
+    'manual': 'a1a2a3'
   };
 
   var result = om(obj, map);
@@ -1644,22 +1652,22 @@ test('mapping - map full array without destination key via transform', function 
 
 test('mapping - map full array to same array on destination side', function (t) {
   var obj = {
-    thing : [
-      {a: 'a1', b: 'b1'}
-      , {a: 'a2', b: 'b2'}
-      , {a: 'a3', b: 'b3'}
+    thing: [
+      { a: 'a1', b: 'b1' }
+      , { a: 'a2', b: 'b2' }
+      , { a: 'a3', b: 'b3' }
     ]
   };
 
   var map = {
-    'thing' : 'thing2'
+    'thing': 'thing2'
   };
 
   var expect = {
-    'thing2' : [
-      {a: 'a1', b: 'b1'}
-      , {a: 'a2', b: 'b2'}
-      , {a: 'a3', b: 'b3'}
+    'thing2': [
+      { a: 'a1', b: 'b1' }
+      , { a: 'a2', b: 'b2' }
+      , { a: 'a3', b: 'b3' }
     ]
   };
 
@@ -1671,26 +1679,28 @@ test('mapping - map full array to same array on destination side', function (t) 
 
 test('mapping - map and append full array to existing mapped array', function (t) {
   var obj = {
-    thing : [
-      {a: 'a1', b: 'b1'}
-      , {a: 'a2', b: 'b2'}
-      , {a: 'a3', b: 'b3'}
+    thing: [
+      { a: 'a1', b: 'b1' }
+      , { a: 'a2', b: 'b2' }
+      , { a: 'a3', b: 'b3' }
     ],
-    thingOther:[{a: 'a4', b: 'b4'}
-    , {a: 'a5', b: 'b5'}
-    , {a: 'a6', b: 'b6'}]
+    thingOther: [{ a: 'a4', b: 'b4' }
+      , { a: 'a5', b: 'b5' }
+      , { a: 'a6', b: 'b6' }]
   };
 
   var map = {
-    'thing' : 'thing2[]+',
-    'thingOther' : 'thing2[]+',
+    'thing': 'thing2[]+',
+    'thingOther': 'thing2[]+',
   };
 
-  var expect = {thing2:
-    [
-      [ { a: 'a1', b: 'b1' }, { a: 'a2', b: 'b2' }, { a: 'a3', b: 'b3' } ],
-      [ { a: 'a4', b: 'b4' }, { a: 'a5', b: 'b5' }, { a: 'a6', b: 'b6' } ]
-    ]}
+  var expect = {
+    thing2:
+      [
+        [{ a: 'a1', b: 'b1' }, { a: 'a2', b: 'b2' }, { a: 'a3', b: 'b3' }],
+        [{ a: 'a4', b: 'b4' }, { a: 'a5', b: 'b5' }, { a: 'a6', b: 'b6' }]
+      ]
+  }
 
   var result = om(obj, map);
 
@@ -1700,22 +1710,22 @@ test('mapping - map and append full array to existing mapped array', function (t
 
 test('map object to another - prevent null values from being mapped', function (t) {
   var obj = {
-    "a" : 1234,
+    "a": 1234,
     "foo": {
       "bar": null
     }
   };
 
   var expect = {
-    foo:{
-      a:1234
+    foo: {
+      a: 1234
     }
   };
 
   var map = {
-    'foo.bar' : 'bar.bar',
+    'foo.bar': 'bar.bar',
     'a': 'foo.a'
-   };
+  };
 
   var result = om(obj, map);
 
@@ -1725,23 +1735,23 @@ test('map object to another - prevent null values from being mapped', function (
 
 test('map object to another - allow null values', function (t) {
   var obj = {
-    "a" : 1234,
+    "a": 1234,
     "foo": {
       "bar": null
     }
   };
 
   var expect = {
-    foo:{
-      a:1234
+    foo: {
+      a: 1234
     },
-    bar:null
+    bar: null
   };
 
   var map = {
-    'foo.bar' : 'bar?',
+    'foo.bar': 'bar?',
     'a': 'foo.a'
-   };
+  };
 
   var result = om(obj, map);
 
@@ -1751,25 +1761,25 @@ test('map object to another - allow null values', function (t) {
 
 test('map object to another - allow null values', function (t) {
   var obj = {
-    "a" : 1234,
+    "a": 1234,
     "foo": {
       "bar": null
     }
   };
 
   var expect = {
-    foo:{
-      a:1234
+    foo: {
+      a: 1234
     },
-    bar:{
-      bar:null
+    bar: {
+      bar: null
     }
   };
 
   var map = {
-    'foo.bar' : 'bar.bar?',
+    'foo.bar': 'bar.bar?',
     'a': 'foo.a'
-   };
+  };
 
   var result = om(obj, map);
 
@@ -1811,7 +1821,7 @@ test('original various tests', function (t) {
     }]]
     , "inventory.onHandQty": "Envelope.Request.Item.Inventory?"
     , "inventory.replenishQty": "Envelope.Request.Item.RelpenishQuantity?"
-    , "inventory.isInventoryItem": {key: ["Envelope.Request.Item.OnInventory", null, "YES"]}
+    , "inventory.isInventoryItem": { key: ["Envelope.Request.Item.OnInventory", null, "YES"] }
     , "price": ["Envelope.Request.Item.Price[].List", "Envelope.Request.Item.Price[].Value", "Test[]"]
     , "descriptions[0]": "Envelope.Request.Item.ShortDescription"
     , "descriptions[1]": "Envelope.Request.Item.LongDescription"
@@ -1964,7 +1974,7 @@ test('Mapping destination property with wrong escaped dot', function (t) {
   };
 
   var expect = {
-    "bar": {"baz": "baz"}
+    "bar": { "baz": "baz" }
   };
 
   var map = {
@@ -2109,24 +2119,26 @@ test('Object is created when it should not be #57', function (t) {
 test('Multi-level array issue #29', function (t) {
   var orig = {
     foo: [
-        {"name": "a", "things": ["a1", "a2"]},
-        {"name": "b", "things": ["b1", "b2"]}
+      { "name": "a", "things": ["a1", "a2"] },
+      { "name": "b", "things": ["b1", "b2"] }
     ]
   }
   var map = {
     "foo[].name": "bar[].label",
     "foo[].things[]": "bar[].values[]"
   };
-    
-  var expect = {bar: [{
-    label: "a",
-    values: ["a1", "a2"]
+
+  var expect = {
+    bar: [{
+      label: "a",
+      values: ["a1", "a2"]
     },
     {
-    label: "b",
-    values: ["b1", "b2"]
-  }]}
-  
+      label: "b",
+      values: ["b1", "b2"]
+    }]
+  }
+
   var result = om(orig, map);
 
   t.deepEqual(result, expect);
@@ -2142,7 +2154,7 @@ test('Ensure that boolean values work for both arrays and objects #37', function
   var from_obj = {
     "foo": {
       "bar": false,
-      "baz": [1,2,'three',false]
+      "baz": [1, 2, 'three', false]
     }
   };
 
@@ -2154,7 +2166,7 @@ test('Ensure that boolean values work for both arrays and objects #37', function
   var expect = {
     test: 1,
     baz: false,
-    biff: [1,2,'three',false]
+    biff: [1, 2, 'three', false]
   };
 
 
@@ -2167,12 +2179,12 @@ test('Ensure that boolean values work for both arrays and objects #37', function
 test('Ensure that multi-dimentional arrays work #41', function (t) {
   var src = {
     "arr": [
-        {
-            "id": 1
-        }
+      {
+        "id": 1
+      }
     ]
   };
-  
+
   var expect = null
   var result = om.getKeyValue(src, "arr[].arr[].id");
 
@@ -2183,19 +2195,19 @@ test('Ensure that multi-dimentional arrays work #41', function (t) {
 test('Ensure that multi-dimentional arrays work #41', function (t) {
   var src = {
     "arr": [
-        {
-            "id": 1
-        }
+      {
+        "id": 1
+      }
     ]
   };
-  
+
   var map = {
     "arr[].id": "arr[].id",
     "arr[].arr[].id": "arr[].arr[].id",
     "arr[].arr[].arr[].id": "arr[].arr[].arr[].id"
   };
-  
-  var expect = {"arr":[{"id":1}]};
+
+  var expect = { "arr": [{ "id": 1 }] };
 
 
   var result = om(src, map);
@@ -2206,23 +2218,23 @@ test('Ensure that multi-dimentional arrays work #41', function (t) {
 
 test('Make sure no objects are created without data #48', function (t) {
   var obj = {
-    "a" : 1234,
+    "a": 1234,
     "foo": {
       "bar": null
     }
   };
-  
+
   var expect = {
-    foo:{
-      a:1234
+    foo: {
+      a: 1234
     }
   };
-  
+
   var map = {
-    'foo.bar' : 'bar.bar',
+    'foo.bar': 'bar.bar',
     'a': 'foo.a'
-   };
-  
+  };
+
 
   var result = om(obj, map);
 
@@ -2368,7 +2380,7 @@ test('Should correctly map to a subelement of indexed array item.', function (t)
   };
 
   var expect = {
-    "result": [ {
+    "result": [{
       "env": {
         "nodes": [
           {
@@ -2574,9 +2586,9 @@ test('Should correctly map to a subelement of indexed array item deep in the obj
 });
 
 test('MAP Should correctly create an array and add if undlerlying data structure is object #64', function (t) {
-  var src = {foo: {bar: 'baz'}}
+  var src = { foo: { bar: 'baz' } }
   var map = { 'foo[].bar': 'abc[].def' }
-  var expect = { abc: [ {def: 'baz'} ] }
+  var expect = { abc: [{ def: 'baz' }] }
   var result = om(src, map)
 
   t.deepEqual(result, expect)
@@ -2599,59 +2611,6 @@ test("MAP Should correctly apply transform in array data #68", t => {
     check: [1234, 5678, 9101]
   };
   var result = om(src, map);
-
-  t.deepEqual(result, expect);
-  t.end();
-});
-
-test("issue #69: should create an array of values", t => {
-  var src = [
-    { identification: 1235, name: 'John Doe'},
-    { identification: 9876, name: 'Brock Doe' }];
-
-  var map = { identification: 'id'};
-
-  var expect = { id: [ 1235, 9876 ] };
-
-  var result = om(src, map);
-
-  t.deepEqual(result, expect);
-  t.end();
-});
-
-test("issue #71: mapping array should not fail when not defined", t => {
-  const src = {};
-
-  const map = {
-    mySizes: [{
-        key: 'sizes',
-        transform: sizes => sizes.map(data => data),
-        default: () => []
-    }]
-  };
-
-  const expect = { sizes: [] };
-
-  const result = om(src, map);
-
-  t.deepEqual(result, expect);
-  t.end();
-});
-
-test("issue #74: mapping empty array should result in empty array", t => {
-  const src = {nbMember : 5, activityList: []};
-
-  const map = {
-    'nbMember': 'maxPlayerCount'
-    , 'activityList[].id': 'activityList[].id'
-  };
-
-  const expect = {
-    activityList: []
-    , maxPlayerCount: 5
-  }
-
-  const result = om(src, map);
 
   t.deepEqual(result, expect);
   t.end();
