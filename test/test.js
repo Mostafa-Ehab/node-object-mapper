@@ -2108,7 +2108,7 @@ test('Mapping properties with glob patterns with incomplete path', function (t) 
 
 test('Object is created when it should not be #57', function (t) {
   var obj = {}
-  var expect
+  var expect = {}
   const map = { key1: "a.b.c" }
 
   var result = om(obj, map);

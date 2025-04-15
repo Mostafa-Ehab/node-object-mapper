@@ -30,6 +30,11 @@ function ObjectMapper(src, dest, map) {
     dest = setKeyValue(dest, destkey, data, context)
   }
 
+  if (dest === null || typeof dest === 'undefined') {
+    // If the destination object is not defined, create an empty object
+    dest = {}
+  }
+
   return dest
 }
 
